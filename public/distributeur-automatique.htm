@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Distributeur Automatique</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="distributeur-automatique.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function formatSolution(result) {
+                var maxPurchase = result.maxPurchase;
+                var solutions = result.solutions;
+                var solutionCount = solutions.length;
+                var resultHTML = "";
+                resultHTML += "<div>maximal purchase price: " + maxPurchase.toString() + "</div>";
+                resultHTML += "<div>solution count: " + solutionCount.toString() + "</div>";
+                resultHTML += "<div>solutions:</div>";
+                for (var i in solutions) {
+                    var solutionStr = solutions[i].map(function (price) {
+                        return price.toString();
+                    }).join(",");
+                    resultHTML += "<div>" + solutionStr + "</div>"
+                }
+                return resultHTML;
+            }
+            $("#find_exact_purchase").submit(function (e) {
+                e.preventDefault();
+                var find_exact_purchase = $("#find_exact_purchase");
+                var pricesStr = find_exact_purchase.find("input:text[name='prices']").val();
+                var budgetStr = find_exact_purchase.find("input:text[name='budget']").val();
+                var action_url = "/api/find_exact_purchase";
+
+                var prices = pricesStr.split(",").map(function (num) {
+                    return parseInt(num);
+                });
+                var budget = parseInt(budgetStr);
+
+                var result = evaluateMaxPurchase(prices, budget);
+                $("#solution").html(formatSolution(result));
+
+                /*
+                var inputData = { prices: prices, budget: budget };
+                $.ajax({
+                    type: "POST",
+                    url: action_url,
+                    data: JSON.stringify(inputData),
+                    success: function (data, textStatus, jqXHR) {
+                        $("#solution").html(formatSolution(data));
+                    },
+                    dataType: "json"
+                })
+                */
+
+                //$("#find_exact_purchase").attr("action", action_url);
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <h1>Distributeur Automatique</h1>
+
+    <h2>please input prices and your budget</h2>
+    <form id="find_exact_purchase" method="post">
+        <table>
+            <tr>
+                <td>prices:</td>
+                <td><input type="text" name="prices" size=90
+                        value="24, 29, 37, 33, 22, 109, 38, 32, 57, 30, 132, 19, 14, 27, 28"></td>
+            </tr>
+            <tr>
+                <td>budget:</td>
+                <td><input type="text" name="budget" size=90 value="250"></td>
+            </tr>
+        </table>
+        <input type="submit">
+    </form>
+    <div id="solution"></div>
+</body>
+
+</html>
