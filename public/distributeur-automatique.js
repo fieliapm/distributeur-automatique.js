@@ -136,17 +136,3 @@ function evaluateMaxPurchase(prices, budget) {
     }
 }
 
-
-var a = [24, 29, 37, 33, 22, 109, 38, 32, 57, 30, 132, 19, 14, 27, 28];
-var b = 141;
-//var b = 250;
-//var a = [12,13];
-//var b = 30;
-//var a = [2,3,4];
-//var b = 10;
-s = new Date();
-var r = evaluateMaxPurchase(a, b);
-e = new Date();
-console.log(e - s);
-//var r = FindExactPurchaseDP(a, b);
-console.log([r.maxPurchase, r.solutions.length])
