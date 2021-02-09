@@ -5,36 +5,51 @@
 <head>
     <title>Distributeur Automatique</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="cookie.js"></script>
+    <script type="text/javascript" src="io-util.js"></script>
     <script type="text/javascript" src="distributeur-automatique.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
+            function restoreInput() {
+                var data = loadStorage();
+                if (data === null) {
+                    data = { prices: [24, 29, 37, 33, 22, 109, 38, 32, 57, 30, 132, 19, 14, 27, 28], budget: 250 };
+                }
+
+                var find_max_purchase = $("#find_max_purchase");
+                find_max_purchase.find("input:text[name='prices']").val(formatNumberArray(data.prices));
+                find_max_purchase.find("input:text[name='budget']").val(data.budget);
+            }
+
             function formatSolution(result) {
                 var maxPurchase = result.maxPurchase;
+                var unusedPrices = result.unusedPrices;
                 var solutions = result.solutions;
                 var solutionCount = solutions.length;
                 var resultHTML = "";
                 resultHTML += "<div>maximal purchase price: " + maxPurchase.toString() + "</div>";
+                resultHTML += "<div>unused prices: " + JSON.stringify(unusedPrices) + "</div>";
                 resultHTML += "<div>solution count: " + solutionCount.toString() + "</div>";
                 resultHTML += "<div>solutions:</div>";
                 for (var i in solutions) {
-                    var solutionStr = solutions[i].map(function (price) {
-                        return price.toString();
-                    }).join(",");
-                    resultHTML += "<div>" + solutionStr + "</div>"
+                    var solutionStr = JSON.stringify(solutions[i]);
+                    resultHTML += "<div>" + solutionStr + "</div>";
                 }
                 return resultHTML;
             }
-            $("#find_exact_purchase").submit(function (e) {
-                e.preventDefault();
-                var find_exact_purchase = $("#find_exact_purchase");
-                var pricesStr = find_exact_purchase.find("input:text[name='prices']").val();
-                var budgetStr = find_exact_purchase.find("input:text[name='budget']").val();
-                var action_url = "/api/find_exact_purchase";
 
-                var prices = pricesStr.split(",").map(function (num) {
-                    return parseInt(num);
-                });
+            $("#find_max_purchase").submit(function (e) {
+                e.preventDefault();
+
+                var find_max_purchase = $("#find_max_purchase");
+                var pricesStr = find_max_purchase.find("input:text[name='prices']").val();
+                var budgetStr = find_max_purchase.find("input:text[name='budget']").val();
+                //var action_url = "/api/find_max_purchase";
+
+                var prices = parseNumberArray(pricesStr);
                 var budget = parseInt(budgetStr);
+
+                saveStorage(prices, budget);
 
                 var result = evaluateMaxPurchase(prices, budget);
                 $("#solution").html(formatSolution(result));
@@ -52,8 +67,15 @@
                 })
                 */
 
-                //$("#find_exact_purchase").attr("action", action_url);
+                //$("#find_max_purchase").attr("action", action_url);
             });
+
+            $("#find_max_purchase").find("input:button[name='reset']").click(function (e) {
+                clearStorage();
+                restoreInput();
+            });
+
+            restoreInput();
         });
     </script>
 </head>
@@ -62,19 +84,19 @@
     <h1>Distributeur Automatique</h1>
 
     <h2>please input prices and your budget</h2>
-    <form id="find_exact_purchase" method="post">
+    <form id="find_max_purchase" method="post">
         <table>
             <tr>
                 <td>prices:</td>
-                <td><input type="text" name="prices" size=90
-                        value="24, 29, 37, 33, 22, 109, 38, 32, 57, 30, 132, 19, 14, 27, 28"></td>
+                <td><input type="text" name="prices" size=90></td>
             </tr>
             <tr>
                 <td>budget:</td>
-                <td><input type="text" name="budget" size=90 value="250"></td>
+                <td><input type="text" name="budget" size=90></td>
             </tr>
         </table>
         <input type="submit">
+        <input type="button" name="reset" value="reset">
     </form>
     <div id="solution"></div>
 </body>

@@ -21,6 +21,9 @@
 /* jshint esversion: 6 */
 
 
+"use strict";
+
+
 function _init2DArray(m, n) {
     var a = new Array(m);
     for (var i = 0; i < a.length; ++i) {
@@ -99,6 +102,7 @@ function MaxPurchaseSolutionDP(prices, budget) {
 function evaluateMaxPurchase(prices, budget) {
     var solutions = [];
     var path = [];
+    var arePricesUnused = new Array(prices.length).fill(true);
     function traceMaxPurchase(maxPurchaseSolution, prices, priceLen, budget) {
         if (priceLen <= 0) {// || budget <= 0){
             solutions.push(path.slice());
@@ -116,6 +120,7 @@ function evaluateMaxPurchase(prices, budget) {
         if (budget >= price) {
             var purchaseWithThisItem = price + maxPurchaseSolution.findMaxPurchase(priceLen, budget - price);
             if (maxPurchase === purchaseWithThisItem) {
+                arePricesUnused[priceLen - 1] = false;
                 path.push(price);
                 traceMaxPurchase(maxPurchaseSolution, prices, priceLen, budget - price);
                 path.pop();
@@ -130,9 +135,17 @@ function evaluateMaxPurchase(prices, budget) {
 
     var maxPurchase = traceMaxPurchase(maxPurchaseSolution, prices, prices.length, budget, []);
 
+    var unusedPrices = [];
+    for (var i in prices) {
+        if (arePricesUnused[i]) {
+            unusedPrices.push(prices[i]);
+        }
+    }
+
     return {
         maxPurchase: maxPurchase,
-        solutions: solutions,
+        unusedPrices: unusedPrices,
+        solutions: solutions
     }
 }
 
